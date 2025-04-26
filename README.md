@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Chronos Web UI
+
+A Next.js web application with authentication and protected routes using js-cookie.
+
+## Features
+
+- Client-side authentication with js-cookie
+- Protected routes with middleware
+- Dark/light mode support
+- Responsive design
+- Secure API requests with auth token
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ and npm
+
+### Environment Setup
+
+Create a `.env.local` file in the root directory of the project with the following variables:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+```
+
+Replace with your actual API URL.
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Authentication Flow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application implements a complete authentication flow:
 
-## Learn More
+1. **Login**: Users can log in with email and password
+2. **Verification**: Some accounts might require email verification
+3. **Protected Routes**: Middleware ensures only authenticated users can access protected routes
+4. **Cookie Management**: Auth tokens are stored in cookies using js-cookie
+5. **Automatic Logout**: Users are logged out automatically on token expiration
 
-To learn more about Next.js, take a look at the following resources:
+## Cookie Handling
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This application uses js-cookie for cookie management:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Simple, lightweight cookie management
+- Cross-browser compatibility
+- Easy API for setting, getting, and removing cookies
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/                 # Next.js app router
+│   ├── login/           # Login page
+│   ├── layout.js        # Root layout
+│   └── page.js          # Home page (protected)
+├── components/          # Reusable components
+│   └── Navbar.js        # Navigation component
+├── lib/                 # Library code
+│   └── axios.js         # Axios instance configuration
+├── services/            # Service layer
+│   └── auth.js          # Authentication service
+└── utils/               # Utility functions
+    └── cookies.js       # Cookie management with js-cookie
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Endpoints
+
+### Authentication
+
+- `POST /auth/login` - Log in with email and password
+- `POST /auth/verify` - Verify email with verification code
+
+## License
+
+This project is licensed under the MIT License.
