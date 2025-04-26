@@ -1,25 +1,26 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
-  // Get the token from cookies
   const token = request.cookies.get('token')?.value;
   
-  // Define public paths that don't require authentication
-  const publicPaths = ['/login', '/register', '/verify'];
-  
-  // Check if the path is public
+  const authPaths = ['/login', '/register', '/verify'];
+  const publicPaths = ['/'];
+
   const isPublicPath = publicPaths.some(path => 
     request.nextUrl.pathname === path || 
     request.nextUrl.pathname.startsWith(`${path}/`)
   );
   
-  // If no token and trying to access protected route, redirect to login
-  if (!token && !isPublicPath) {
+  const isAuthPath = authPaths.some(path => 
+    request.nextUrl.pathname === path || 
+    request.nextUrl.pathname.startsWith(`${path}/`)
+  );
+  
+  if (!token && !isPublicPath && !isAuthPath) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   
-  // If token exists and trying to access login/register pages, redirect to home
-  if (token && isPublicPath) {
+  if (token && isAuthPath) {
     return NextResponse.redirect(new URL('/', request.url));
   }
   
