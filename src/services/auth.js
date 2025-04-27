@@ -1,5 +1,5 @@
 import axios from '@/lib/axios';
-import { setCookie, getCookie, removeCookie } from '@/utils/cookies';
+import { setCookie, getCookie, removeCookie } from '@/lib/cookies';
 
 export const login = async (email, password) => {
   const response = await axios.post('/auth/login', { email, password });

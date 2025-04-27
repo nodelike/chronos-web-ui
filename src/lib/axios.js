@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getCookie, removeCookie } from '@/utils/cookies';
+import { getCookie, removeCookie } from '@/lib/cookies';
 
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
