@@ -101,8 +101,39 @@ const OcrSection = ({ mediaMeta }) => {
 
     return (
         <div className="bg-chBgPrimary/50 p-5 rounded-xl border border-chBorder shadow-sm">
-            <h3 className="text-lg font-semibold mb-2 text-chTextPrimary">Text found:</h3>
+            <h3 className="text-lg font-semibold mb-1 text-chTextPrimary">Text found:</h3>
             <p className="text-chTextPrimary">{ocrMeta.payload.text}</p>
+        </div>
+    );
+};
+
+// Content Moderation component
+const ContentModerationSection = ({ mediaMeta }) => {
+    const moderationMeta = mediaMeta?.find((meta) => meta.type === "CONTENT_MODERATION");
+    if (!moderationMeta || !moderationMeta.payload || moderationMeta.payload.length === 0) return null;
+
+    return (
+        <div className="bg-chBgPrimary/50 p-5 rounded-xl border border-chBorder shadow-sm">
+            <h3 className="text-lg font-semibold mb-4 text-chTextPrimary">Content Advisory</h3>
+            <div className="space-y-1">
+                {moderationMeta.payload.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                        <div>
+                            <span className="text-chTextPrimary font-medium text-sm">{item.Name}</span>
+                            {item.ParentName && <span className="text-chTextSecondary text-xs ml-2">({item.ParentName})</span>}
+                        </div>
+                        <div className="flex items-center">
+                            <div
+                                className={`w-16 h-1.5 rounded-full mr-2 ${
+                                    item.Confidence > 90 ? "bg-red-500" : item.Confidence > 70 ? "bg-orange-500" : "bg-yellow-500"
+                                }`}>
+                                <div className="h-full bg-gray-200 rounded-full" style={{ width: `${100 - item.Confidence}%` }}></div>
+                            </div>
+                            <span className="text-xs text-chTextSecondary">{item.Confidence.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
@@ -314,6 +345,7 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
                                         />
                                         <LabelsSection mediaMeta={photoDetails.mediaMeta} />
                                         <OcrSection mediaMeta={photoDetails.mediaMeta} />
+                                        <ContentModerationSection mediaMeta={photoDetails.mediaMeta} />
                                     </div>
                                 </div>
                             </div>
