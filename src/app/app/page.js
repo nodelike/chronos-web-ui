@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
     DocumentTextIcon,
     CheckCircleIcon,
@@ -12,28 +12,20 @@ import {
     TrashIcon,
     EllipsisHorizontalIcon,
     XMarkIcon,
-    PaperClipIcon,
 } from "@heroicons/react/24/outline";
 import SearchBar from "@/components/SearchBar";
-import { getStorageItems, uploadPhoto } from "@/services/storageItem";
+import { getStorageItems } from "@/services/storageItem";
 import PhotoCard from "./storage/components/PhotoCard";
 import { StorageItemTypes } from "@/services/choices";
-import PhotoUploader from "./storage/components/PhotoUploader";
 import FileDragDropHandler from "@/components/FileDragDropHandler";
+import AddItemModal from "./storage/components/AddItemModal";
 
 export default function StoragePage() {
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedItemType, setSelectedItemType] = useState(StorageItemTypes.NOTE);
-    const [uploadedFile, setUploadedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [isUploading, setIsUploading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const fileInputRef = useRef(null);
-    const [documentName, setDocumentName] = useState("");
-    const [documentFile, setDocumentFile] = useState(null);
+    const [droppedFile, setDroppedFile] = useState(null);
+    const [modalItemType, setModalItemType] = useState(StorageItemTypes.NOTE);
 
     const fetchStorageItems = async () => {
         try {
@@ -43,7 +35,7 @@ export default function StoragePage() {
             console.error("Error fetching storage items:", error);
         }
     };
-
+    
     useEffect(() => {
         fetchStorageItems();
     }, []);
@@ -51,183 +43,30 @@ export default function StoragePage() {
     const filteredItems = filter === "all" ? items : items.filter((item) => item.type === filter);
 
     const openModal = (initialType = StorageItemTypes.NOTE) => {
-        setSelectedItemType(initialType);
+        setModalItemType(initialType);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        // Reset states
-        setUploadedFile(null);
-        setDocumentFile(null);
-        setDocumentName("");
-        setUploadProgress(0);
-        setIsUploading(false);
-        setErrorMessage("");
-    };
-
-    const handleItemTypeChange = (e) => {
-        setSelectedItemType(e.target.value);
-        // Reset upload states when changing item type
-        setUploadedFile(null);
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            validateAndPreviewFile(file);
-        }
-    };
-
-    const validateAndPreviewFile = (file) => {
-        // Reset states
-        setErrorMessage("");
-
-        // Check if file is an image
-        if (!file.type.startsWith("image/")) {
-            setErrorMessage("Please select an image file (JPG, PNG, etc.)");
-            return;
-        }
-
-        // Check file size (limit to 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setErrorMessage("File size exceeds 5MB limit");
-            return;
-        }
-
-        // Create preview URL
-        const fileReader = new FileReader();
-        fileReader.onload = () => {
-            setPreviewUrl(fileReader.result);
-        };
-        fileReader.readAsDataURL(file);
-
-        setUploadedFile(file);
-    };
-
-    const handleFileDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            validateAndPreviewFile(e.dataTransfer.files[0]);
-        }
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const triggerFileInput = () => {
-        fileInputRef.current.click();
-    };
-
-    const handleFileSelect = (file) => {
-        setUploadedFile(file);
-        setErrorMessage("");
-    };
-
-    const handleError = (error) => {
-        setErrorMessage(error);
+        setDroppedFile(null);
     };
 
     const handleGlobalFileDrop = (file, fileType) => {
         // Determine which modal to open based on file type
         if (fileType === "photo") {
-            setSelectedItemType(StorageItemTypes.PHOTO);
-            setUploadedFile(file);
+            setModalItemType(StorageItemTypes.PHOTO);
         } else if (fileType === "document") {
-            setSelectedItemType(StorageItemTypes.DOCUMENT);
-            setDocumentFile(file);
-            setDocumentName(file.name);
+            setModalItemType(StorageItemTypes.DOCUMENT);
         }
-
-        // Open the modal
+        
+        setDroppedFile(file);
         setIsModalOpen(true);
     };
 
-    const handleSubmit = async () => {
-        if (selectedItemType === StorageItemTypes.PHOTO && uploadedFile) {
-            setIsUploading(true);
-            setUploadProgress(0);
-
-            try {
-                // Simulate upload progress
-                const progressInterval = setInterval(() => {
-                    setUploadProgress((prev) => {
-                        if (prev >= 90) {
-                            clearInterval(progressInterval);
-                            return 90;
-                        }
-                        return prev + 10;
-                    });
-                }, 300);
-
-                // Upload the photo
-                await uploadPhoto(uploadedFile);
-
-                // Complete the progress bar
-                clearInterval(progressInterval);
-                setUploadProgress(100);
-
-                // Fetch updated list of items
-                await fetchStorageItems();
-
-                // Clear and close modal
-                setTimeout(() => {
-                    setIsUploading(false);
-                    setUploadedFile(null);
-                    closeModal();
-                }, 500);
-            } catch (error) {
-                console.error("Error uploading photo:", error);
-                setErrorMessage("Failed to upload photo. Please try again.");
-                setIsUploading(false);
-            }
-        } else if (selectedItemType === StorageItemTypes.DOCUMENT && documentFile) {
-            setIsUploading(true);
-            setUploadProgress(0);
-
-            try {
-                // Simulate upload progress
-                const progressInterval = setInterval(() => {
-                    setUploadProgress((prev) => {
-                        if (prev >= 90) {
-                            clearInterval(progressInterval);
-                            return 90;
-                        }
-                        return prev + 10;
-                    });
-                }, 300);
-
-                // For now, we're using the same upload function
-                // In a real app, you might have a separate API endpoint for documents
-                await uploadPhoto(documentFile);
-
-                // Complete the progress bar
-                clearInterval(progressInterval);
-                setUploadProgress(100);
-
-                // Fetch updated list of items
-                await fetchStorageItems();
-
-                // Clear and close modal
-                setTimeout(() => {
-                    setIsUploading(false);
-                    setDocumentFile(null);
-                    setDocumentName("");
-                    closeModal();
-                }, 500);
-            } catch (error) {
-                console.error("Error uploading document:", error);
-                setErrorMessage("Failed to upload document. Please try again.");
-                setIsUploading(false);
-            }
-        } else {
-            // Handle other item types
-            closeModal();
-        }
+    const handleItemAdded = () => {
+        // Refresh the list after an item is added
+        fetchStorageItems();
     };
 
     // Render different card types based on item type
@@ -470,121 +309,25 @@ export default function StoragePage() {
                 );
         }
     };
-
-    // Add a document file field renderer
-    const renderDocumentField = () => (
-        <div className="space-y-2">
-            <label className="block text-sm font-medium text-chTextPrimary">Document Title</label>
-            <input
-                type="text"
-                className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
-                placeholder="Enter document title"
-                value={documentName}
-                onChange={(e) => setDocumentName(e.target.value)}
-            />
-
-            {documentFile ? (
-                <div className="mt-4 p-3 bg-chBgPrimary border border-chBorder rounded-lg flex items-center justify-between">
-                    <div className="flex items-center">
-                        <DocumentIcon className="h-10 w-10 text-ctaPrimary mr-3" />
-                        <div>
-                            <p className="text-chTextPrimary font-medium truncate max-w-[200px]">{documentFile.name}</p>
-                            <p className="text-chTextSecondary text-xs">{Math.round(documentFile.size / 1024)} KB</p>
-                        </div>
-                    </div>
-                    <button onClick={() => setDocumentFile(null)} className="text-chTextSecondary hover:text-red-500">
-                        <XMarkIcon className="h-5 w-5" />
-                    </button>
-                </div>
-            ) : (
-                <div className="border-2 border-dashed border-chBorder rounded-lg p-4 text-center cursor-pointer hover:border-ctaPrimary transition-colors mt-4">
-                    <div className="flex flex-col items-center gap-2">
-                        <PaperClipIcon className="h-8 w-8 text-chTextSecondary" />
-                        <p className="text-chTextPrimary font-medium">File dropped and ready to upload</p>
-                        <p className="text-chTextSecondary text-xs">Edit the title above before saving</p>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-
-    // Add Item Modal JSX
-    const renderAddItemModal = () => (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-chBgSecondary rounded-xl p-6 max-w-md w-full shadow-xl border border-chBorder">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-chTextPrimary">Add New Item</h2>
-                    <button onClick={closeModal} className="text-chTextSecondary hover:text-chTextPrimary">
-                        <XMarkIcon className="h-6 w-6" />
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-chTextPrimary">Item Type</label>
-                        <select
-                            className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
-                            value={selectedItemType}
-                            onChange={handleItemTypeChange}>
-                            {Object.values(StorageItemTypes).map((type) => (
-                                <option key={`${type}-option`} value={type}>
-                                    {type}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {selectedItemType === StorageItemTypes.PHOTO ? (
-                        <PhotoUploader onFileSelect={handleFileSelect} onError={handleError} initialFile={uploadedFile} />
-                    ) : selectedItemType === StorageItemTypes.DOCUMENT && documentFile ? (
-                        renderDocumentField()
-                    ) : (
-                        // Default title field for other item types
-                        <div className="space-y-2">
-                            <label className="block text-sm font-medium text-chTextPrimary">Title</label>
-                            <input
-                                type="text"
-                                className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
-                                placeholder="Enter title"
-                            />
-                        </div>
-                    )}
-
-                    <div className="pt-4 flex justify-end gap-2">
-                        <button onClick={closeModal} className="px-4 py-2 border border-chBorder rounded-md text-chTextPrimary hover:bg-chBgPrimary">
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={
-                                (selectedItemType === StorageItemTypes.PHOTO && !uploadedFile) ||
-                                (selectedItemType === StorageItemTypes.DOCUMENT && !documentFile)
-                            }
-                            className={`px-4 py-2 rounded-md ${
-                                (selectedItemType === StorageItemTypes.PHOTO && !uploadedFile) ||
-                                (selectedItemType === StorageItemTypes.DOCUMENT && !documentFile)
-                                    ? "bg-ctaPrimary/50 text-white/80 cursor-not-allowed"
-                                    : "bg-ctaPrimary text-white hover:bg-opacity-90"
-                            }`}>
-                            {isUploading ? "Uploading..." : "Create"}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
+    
     return (
         <>
             {/* Global file drag-and-drop handler */}
             <FileDragDropHandler onFileDrop={handleGlobalFileDrop} />
-
+            
             {/* Search Bar - Only visible on Storage page */}
             <div className="sticky top-0 z-10 -mt-6 -mx-6 pt-5 px-5 pb-3 bg-chBgPrimary">
                 <SearchBar onOpenModal={openModal} />
             </div>
 
             {/* Add Item Modal */}
-            {isModalOpen && renderAddItemModal()}
+            <AddItemModal 
+                isOpen={isModalOpen} 
+                onClose={closeModal} 
+                onItemAdded={handleItemAdded} 
+                initialItemType={modalItemType}
+                initialFile={droppedFile}
+            />
 
             <div className="mt-6">
                 <div className="mb-8">

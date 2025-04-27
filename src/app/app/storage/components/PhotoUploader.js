@@ -28,9 +28,9 @@ const PhotoUploader = ({ onFileSelect, onError, initialFile }) => {
             return;
         }
 
-        // Check file size (limit to 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            const newError = "File size exceeds 5MB limit";
+        // Check file size (limit to 300MB)
+        if (file.size > 300 * 1024 * 1024) {
+            const newError = "File size exceeds 300MB limit";
             setErrorMessage(newError);
             if (onError) onError(newError);
             return;
@@ -99,7 +99,7 @@ const PhotoUploader = ({ onFileSelect, onError, initialFile }) => {
                         <ArrowUpTrayIcon className="h-10 w-10 text-chTextSecondary" />
                         <p className="text-chTextPrimary font-medium">Drag and drop your photo here</p>
                         <p className="text-chTextSecondary text-sm">or click to browse</p>
-                        <p className="text-chTextSecondary text-xs mt-2">Supports: JPG, PNG, GIF (up to 5MB)</p>
+                        <p className="text-chTextSecondary text-xs mt-2">Supports: JPG, PNG, GIF (up to 300MB)</p>
                     </div>
                 </div>
             ) : (

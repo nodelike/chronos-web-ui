@@ -15,7 +15,7 @@ export const deleteStorageItem = async (id) => {
     return response.data;
 };
 
-export const uploadPhoto = async (file) => {
+export const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
     
