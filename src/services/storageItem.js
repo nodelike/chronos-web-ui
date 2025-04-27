@@ -15,4 +15,17 @@ export const deleteStorageItem = async (id) => {
     return response.data;
 };
 
+export const uploadPhoto = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await axios.post('/storage/file', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    
+    return response.data;
+};
+
 

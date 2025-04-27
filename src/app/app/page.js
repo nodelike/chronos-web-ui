@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     DocumentTextIcon,
     CheckCircleIcon,
@@ -12,9 +12,11 @@ import {
     TrashIcon,
     EllipsisHorizontalIcon,
     XMarkIcon,
+    PaperClipIcon,
+    ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 import SearchBar from "@/components/SearchBar";
-import { getStorageItems } from "@/services/storageItem";
+import { getStorageItems, uploadPhoto } from "@/services/storageItem";
 import PhotoCard from "./storage/components/PhotoCard";
 import { StorageItemTypes } from "@/services/choices";
 
@@ -22,6 +24,13 @@ export default function StoragePage() {
     const [items, setItems] = useState([]);
     const [filter, setFilter] = useState("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedItemType, setSelectedItemType] = useState(StorageItemTypes.NOTE);
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const fileInputRef = useRef(null);
 
     const fetchStorageItems = async () => {
         try {
@@ -44,6 +53,110 @@ export default function StoragePage() {
 
     const closeModal = () => {
         setIsModalOpen(false);
+    };
+
+    const handleItemTypeChange = (e) => {
+        setSelectedItemType(e.target.value);
+        // Clear any uploaded files when changing item type
+        setUploadedFile(null);
+        setPreviewUrl(null);
+        setErrorMessage("");
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            validateAndPreviewFile(file);
+        }
+    };
+
+    const validateAndPreviewFile = (file) => {
+        // Reset states
+        setErrorMessage("");
+        
+        // Check if file is an image
+        if (!file.type.startsWith('image/')) {
+            setErrorMessage("Please select an image file (JPG, PNG, etc.)");
+            return;
+        }
+        
+        // Check file size (limit to 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setErrorMessage("File size exceeds 5MB limit");
+            return;
+        }
+        
+        // Create preview URL
+        const fileReader = new FileReader();
+        fileReader.onload = () => {
+            setPreviewUrl(fileReader.result);
+        };
+        fileReader.readAsDataURL(file);
+        
+        setUploadedFile(file);
+    };
+
+    const handleFileDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            validateAndPreviewFile(e.dataTransfer.files[0]);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
+    const handleSubmit = async () => {
+        if (selectedItemType === StorageItemTypes.PHOTO && uploadedFile) {
+            setIsUploading(true);
+            setUploadProgress(0);
+            
+            try {
+                // Simulate upload progress
+                const progressInterval = setInterval(() => {
+                    setUploadProgress(prev => {
+                        if (prev >= 90) {
+                            clearInterval(progressInterval);
+                            return 90;
+                        }
+                        return prev + 10;
+                    });
+                }, 300);
+                
+                // Upload the photo
+                await uploadPhoto(uploadedFile);
+                
+                // Complete the progress bar
+                clearInterval(progressInterval);
+                setUploadProgress(100);
+                
+                // Fetch updated list of items
+                await fetchStorageItems();
+                
+                // Clear and close modal
+                setTimeout(() => {
+                    setIsUploading(false);
+                    setUploadedFile(null);
+                    setPreviewUrl(null);
+                    closeModal();
+                }, 500);
+            } catch (error) {
+                console.error("Error uploading photo:", error);
+                setErrorMessage("Failed to upload photo. Please try again.");
+                setIsUploading(false);
+            }
+        } else {
+            // Handle other item types
+            closeModal();
+        }
     };
 
     // Render different card types based on item type
@@ -287,6 +400,131 @@ export default function StoragePage() {
         }
     };
 
+    // Add Item Modal JSX
+    const renderAddItemModal = () => (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-chBgSecondary rounded-xl p-6 max-w-md w-full shadow-xl border border-chBorder">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-chTextPrimary">Add New Item</h2>
+                    <button onClick={closeModal} className="text-chTextSecondary hover:text-chTextPrimary">
+                        <XMarkIcon className="h-6 w-6" />
+                    </button>
+                </div>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="block text-sm font-medium text-chTextPrimary">Item Type</label>
+                        <select 
+                            className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
+                            value={selectedItemType}
+                            onChange={handleItemTypeChange}
+                        >
+                            {Object.values(StorageItemTypes).map((type) => (
+                                <option key={`${type}-option`} value={type}>
+                                    {type}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {selectedItemType === StorageItemTypes.PHOTO ? (
+                        // Photo upload UI
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-chTextPrimary">Upload Photo</label>
+                            
+                            {!previewUrl ? (
+                                // Drag and drop area
+                                <div 
+                                    className="border-2 border-dashed border-chBorder rounded-lg p-8 text-center cursor-pointer hover:border-ctaPrimary transition-colors"
+                                    onClick={triggerFileInput}
+                                    onDrop={handleFileDrop}
+                                    onDragOver={handleDragOver}
+                                >
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef} 
+                                        onChange={handleFileChange} 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                    />
+                                    <div className="flex flex-col items-center gap-2">
+                                        <ArrowUpTrayIcon className="h-10 w-10 text-chTextSecondary" />
+                                        <p className="text-chTextPrimary font-medium">Drag and drop your photo here</p>
+                                        <p className="text-chTextSecondary text-sm">or click to browse</p>
+                                        <p className="text-chTextSecondary text-xs mt-2">Supports: JPG, PNG, GIF (up to 5MB)</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Preview area
+                                <div className="relative rounded-lg overflow-hidden border border-chBorder">
+                                    <img 
+                                        src={previewUrl} 
+                                        alt="Preview" 
+                                        className="w-full h-auto max-h-[200px] object-contain bg-black/10"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            setUploadedFile(null);
+                                            setPreviewUrl(null);
+                                        }}
+                                        className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 transition-colors"
+                                    >
+                                        <XMarkIcon className="h-5 w-5" />
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {errorMessage && (
+                                <p className="text-red-500 text-sm">{errorMessage}</p>
+                            )}
+                            
+                            {isUploading && (
+                                <div className="mt-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div 
+                                            className="bg-ctaPrimary h-2.5 rounded-full transition-all duration-300" 
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-right text-chTextSecondary mt-1">
+                                        {uploadProgress === 100 ? "Upload complete!" : `Uploading: ${uploadProgress}%`}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        // Default title field for other item types
+                        <div className="space-y-2">
+                            <label className="block text-sm font-medium text-chTextPrimary">Title</label>
+                            <input
+                                type="text"
+                                className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
+                                placeholder="Enter title"
+                            />
+                        </div>
+                    )}
+                    
+                    <div className="pt-4 flex justify-end gap-2">
+                        <button
+                            onClick={closeModal}
+                            className="px-4 py-2 border border-chBorder rounded-md text-chTextPrimary hover:bg-chBgPrimary">
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={handleSubmit}
+                            disabled={selectedItemType === StorageItemTypes.PHOTO && !uploadedFile}
+                            className={`px-4 py-2 rounded-md ${
+                                selectedItemType === StorageItemTypes.PHOTO && !uploadedFile
+                                    ? "bg-ctaPrimary/50 text-white/80 cursor-not-allowed"
+                                    : "bg-ctaPrimary text-white hover:bg-opacity-90"
+                            }`}>
+                            {isUploading ? "Uploading..." : "Create"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+    
     return (
         <>
             {/* Search Bar - Only visible on Storage page */}
@@ -295,47 +533,7 @@ export default function StoragePage() {
             </div>
 
             {/* Add Item Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-chBgSecondary rounded-xl p-6 max-w-md w-full shadow-xl border border-chBorder">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-chTextPrimary">Add New Item</h2>
-                            <button onClick={closeModal} className="text-chTextSecondary hover:text-chTextPrimary">
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            {/* Modal content here */}
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-chTextPrimary">Item Type</label>
-                                <select className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary">
-                                    {Object.values(StorageItemTypes).map((type) => (
-                                        <option key={`${type}-option`} value={type}>
-                                            {type}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="block text-sm font-medium text-chTextPrimary">Title</label>
-                                <input
-                                    type="text"
-                                    className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary"
-                                    placeholder="Enter title"
-                                />
-                            </div>
-                            <div className="pt-4 flex justify-end gap-2">
-                                <button
-                                    onClick={closeModal}
-                                    className="px-4 py-2 border border-chBorder rounded-md text-chTextPrimary hover:bg-chBgPrimary">
-                                    Cancel
-                                </button>
-                                <button className="px-4 py-2 bg-ctaPrimary text-white rounded-md hover:bg-opacity-90">Create</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {isModalOpen && renderAddItemModal()}
 
             <div className="mt-6">
                 <div className="mb-8">
