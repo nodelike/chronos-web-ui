@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { XMarkIcon, ArrowDownTrayIcon, ShareIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { getStorageItemById } from "@/services/storageItem";
+import { XMarkIcon, ArrowDownTrayIcon, ShareIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { getStorageItemById, deleteStorageItem } from "@/services/storageItem";
 import PeopleGrid from "../components/PeopleGrid";
 
 // Main image section component
@@ -139,7 +139,7 @@ const ContentModerationSection = ({ mediaMeta }) => {
 };
 
 // Modal header component
-const ModalHeader = ({ photoDetails, isFullscreen, toggleFullscreen, onClose, loading }) => {
+const ModalHeader = ({ photoDetails, isFullscreen, toggleFullscreen, onClose, loading, onDelete }) => {
     return (
         <div className="flex justify-between items-center p-4 border-b border-chBorder bg-gradient-to-r from-chBgSecondary to-chBgPrimary/30 backdrop-blur-sm">
             <h2 className="text-xl font-bold text-chTextPrimary">{loading ? "Loading..." : photoDetails?.fileName || "Photo Details"}</h2>
@@ -180,6 +180,12 @@ const ModalHeader = ({ photoDetails, isFullscreen, toggleFullscreen, onClose, lo
                                 )}
                             </svg>
                         </button>
+                        <button
+                            onClick={onDelete}
+                            className="text-red-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-100/20"
+                            title="Delete Photo">
+                            <TrashIcon className="h-5 w-5" />
+                        </button>
                     </>
                 )}
                 <button
@@ -204,13 +210,14 @@ const LoadingSpinner = () => (
 const ErrorMessage = ({ message }) => <div className="text-red-500 text-center py-10">{message}</div>;
 
 // Main PhotoModal component
-const PhotoModal = ({ itemId, isOpen, onClose }) => {
+const PhotoModal = ({ itemId, isOpen, onClose, refetchItems }) => {
     const [photoDetails, setPhotoDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [hoveredFace, setHoveredFace] = useState(null);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // Add CSS animation for tooltip
     useEffect(() => {
@@ -291,6 +298,29 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
         setIsFullscreen(!isFullscreen);
     };
 
+    const handleDelete = async () => {
+        try {
+            await deleteStorageItem(itemId);
+            // Refetch storage items to update the UI
+            if (refetchItems) {
+                refetchItems();
+            }
+            onClose();
+        } catch (err) {
+            console.error("Error deleting photo:", err);
+            setError("Failed to delete the photo. Please try again.");
+        }
+        setShowDeleteConfirm(false);
+    };
+
+    const confirmDelete = () => {
+        setShowDeleteConfirm(true);
+    };
+
+    const cancelDelete = () => {
+        setShowDeleteConfirm(false);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -299,6 +329,26 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}>
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="absolute z-10 bg-chBgSecondary rounded-lg p-6 shadow-2xl max-w-md w-full mx-4" onClick={e => e.stopPropagation()}>
+                    <h3 className="text-xl font-bold text-chTextPrimary mb-4">Delete Photo</h3>
+                    <p className="text-chTextSecondary mb-6">Are you sure you want to delete this photo? This action cannot be undone.</p>
+                    <div className="flex justify-end space-x-3">
+                        <button 
+                            onClick={cancelDelete}
+                            className="px-4 py-2 rounded-md border border-chBorder text-chTextPrimary hover:bg-chBgPrimary">
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={handleDelete}
+                            className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            )}
+            
             <div
                 className={`relative bg-chBgSecondary rounded-xl shadow-2xl border border-chBorder overflow-hidden flex flex-col transition-all duration-300 ${
                     isFullscreen ? "w-full h-full max-w-none max-h-none rounded-none" : "w-full max-w-6xl max-h-[90vh] m-4"
@@ -310,6 +360,7 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
                     toggleFullscreen={toggleFullscreen}
                     onClose={onClose}
                     loading={loading}
+                    onDelete={confirmDelete}
                 />
 
                 {/* Modal Content */}

@@ -13,7 +13,7 @@ export default function SearchBar({ onOpenModal }) {
     };
 
     return (
-        <div className="flex-1 max-w-3xl pl-5 pr-3 flex items-center gap-2 rounded-full bg-chBgSecondary/80 backdrop-blur-md shadow-lg border border-chBorder/30 group">
+        <div className="flex-1 max-w-3xl pl-5 pr-3 flex items-center gap-2 rounded-full bg-chBgSecondary/80 backdrop-blur-md shadow-lg border border-chBorder group">
             <MagnifyingGlassIcon className="h-5 w-5 text-chTextSecondary" />
             <form onSubmit={handleSearch} className="flex-1 relative">
                 <input

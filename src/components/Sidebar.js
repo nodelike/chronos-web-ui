@@ -54,18 +54,18 @@ export default function Sidebar({ onCollapseChange }) {
             {/* Mobile Menu Button */}
             <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="md:hidden fixed top-5 left-5 z-50 w-10 h-10 rounded-md bg-chBgSecondary flex items-center justify-center shadow-md border border-chBorder/30">
+                className="md:hidden fixed top-5 left-5 z-50 w-10 h-10 rounded-md bg-chBgSecondary flex items-center justify-center shadow-md border border-chBorder">
                 {mobileOpen ? <XMarkIcon className="h-6 w-6 text-chTextPrimary" /> : <Bars3Icon className="h-6 w-6 text-chTextPrimary" />}
             </button>
 
             {/* Sidebar for desktop */}
             <div
-                className={`fixed left-0 top-0 h-full bg-chBgSecondary border-r border-chBorder/30 shadow-xl transition-all duration-300 z-40 hidden md:block
+                className={`fixed left-0 top-0 h-full bg-chBgSecondary border-r border-chBorder shadow-xl transition-all duration-300 z-40 hidden md:block
                     ${collapsed ? "w-20" : "w-64"}`}>
                 <div className="flex flex-col h-full">
                     {/* Logo */}
                     <div
-                        className={`flex items-center justify-between px-5 py-6 border-b border-chBorder/30
+                        className={`flex items-center justify-between px-5 py-6 border-b border-chBorder
                         ${collapsed ? "justify-center px-2" : ""}`}>
                         {!collapsed && <h1 className="text-xl font-accent font-bold uppercase tracking-widest text-chTextPrimary">Chronos</h1>}
                         <button onClick={toggleCollapse} className="rounded-md p-1.5 hover:bg-chBgPrimary text-chTextSecondary">
@@ -97,7 +97,7 @@ export default function Sidebar({ onCollapseChange }) {
 
                     {/* Bottom Section with Theme Toggle */}
                     <div
-                        className={`py-5 px-4 border-t border-chBorder/30 
+                        className={`py-5 px-4 border-t border-chBorder 
                         ${collapsed ? "flex justify-center" : "flex items-center justify-between"}`}>
                         {!collapsed && <span className="text-sm font-medium text-chTextSecondary">Theme</span>}
                         <ThemeToggle />
@@ -109,11 +109,11 @@ export default function Sidebar({ onCollapseChange }) {
             <div className={`fixed inset-0 bg-black/50 z-30 md:hidden ${mobileOpen ? "block" : "hidden"}`} onClick={() => setMobileOpen(false)} />
 
             <div
-                className={`fixed left-0 top-0 h-full w-64 bg-chBgSecondary border-r border-chBorder/30 shadow-xl z-40 transition-transform duration-300 md:hidden
+                className={`fixed left-0 top-0 h-full w-64 bg-chBgSecondary border-r border-chBorder shadow-xl z-40 transition-transform duration-300 md:hidden
                 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 <div className="flex flex-col h-full">
                     {/* Logo */}
-                    <div className="flex items-center justify-between px-5 py-6 border-b border-chBorder/30">
+                    <div className="flex items-center justify-between px-5 py-6 border-b border-chBorder">
                         <h1 className="text-xl font-bold text-chTextPrimary">Chronos</h1>
                         <button onClick={() => setMobileOpen(false)} className="rounded-md p-1.5 hover:bg-chBgPrimary text-chTextSecondary">
                             <XMarkIcon className="h-5 w-5" />
@@ -143,7 +143,7 @@ export default function Sidebar({ onCollapseChange }) {
                     </nav>
 
                     {/* Bottom Section with Theme Toggle */}
-                    <div className="py-5 px-4 border-t border-chBorder/30 flex items-center justify-between">
+                    <div className="py-5 px-4 border-t border-chBorder flex items-center justify-between">
                         <span className="text-sm font-medium text-chTextSecondary">Theme</span>
                         <ThemeToggle />
                     </div>

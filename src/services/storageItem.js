@@ -10,4 +10,9 @@ export const getStorageItemById = async (id) => {
     return response.data;
 };
 
+export const deleteStorageItem = async (id) => {
+    const response = await axios.delete(`/storage/${id}`);
+    return response.data;
+};
+
 

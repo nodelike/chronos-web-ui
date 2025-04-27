@@ -17,6 +17,9 @@
         --color-chTextPrimary: rgb(17 24 39);
         --color-chTextSecondary: rgb(107 114 128);
 
+        --color-chTextPrimaryInverted: rgb(255, 255, 255);
+        --color-chTextSecondaryInverted: rgb(209, 213, 219);
+
         --color-ctaPrimary: rgb(162 36 102);
         --color-ctaSecondary: rgb(223, 90, 139);
     }
@@ -30,6 +33,9 @@
 
         --color-chTextPrimary: rgb(255, 255, 255);
         --color-chTextSecondary: rgb(209, 213, 219);
+
+        --color-chTextPrimaryInverted: rgb(0, 0, 0);
+        --color-chTextSecondaryInverted: rgb(57, 57, 57);
     }
 }
 

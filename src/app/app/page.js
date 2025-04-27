@@ -23,16 +23,16 @@ export default function StoragePage() {
     const [filter, setFilter] = useState("all");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const fetchStorageItems = async () => {
+        try {
+            const response = await getStorageItems();
+            setItems(response?.data?.items);
+        } catch (error) {
+            console.error("Error fetching storage items:", error);
+        }
+    };
+    
     useEffect(() => {
-        const fetchStorageItems = async () => {
-            try {
-                const response = await getStorageItems();
-                setItems(response?.data?.items);
-            } catch (error) {
-                console.error("Error fetching storage items:", error);
-            }
-        };
-
         fetchStorageItems();
     }, []);
 
@@ -258,7 +258,7 @@ export default function StoragePage() {
                 );
 
             case StorageItemTypes.PHOTO:
-                return <PhotoCard key={item.id} item={item} />;
+                return <PhotoCard key={item.id} item={item} refetchItems={fetchStorageItems} />;
 
             default:
                 return (
@@ -357,7 +357,9 @@ export default function StoragePage() {
                             key={`${type}-button`}
                             onClick={() => setFilter(StorageItemTypes[type])}
                             className={`px-4 py-2 rounded-full text-sm lowercase first-letter:uppercase ${
-                                filter === StorageItemTypes[type] ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
+                                filter === StorageItemTypes[type]
+                                    ? "bg-ctaPrimary text-white"
+                                    : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
                             }`}>
                             {type}
                         </button>

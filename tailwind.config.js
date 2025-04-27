@@ -12,7 +12,10 @@ module.exports = {
 
                 chTextPrimary: "var(--color-chTextPrimary)",
                 chTextSecondary: "var(--color-chTextSecondary)",
-                
+
+                chTextPrimaryInverted: "var(--color-chTextPrimaryInverted)",
+                chTextSecondaryInverted: "var(--color-chTextSecondaryInverted)",
+
                 ctaPrimary: "var(--color-ctaPrimary)",
                 ctaSecondary: "var(--color-ctaSecondary)",
             },
