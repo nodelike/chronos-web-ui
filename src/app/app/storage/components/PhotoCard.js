@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import PhotoModal from "./PhotoModal";
+import PhotoModal from "../containers/PhotoModal";
 
 const PhotoCard = ({ item }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
