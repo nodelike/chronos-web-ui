@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login, verify, setToken } from "@/services/auth";
 import Navbar from "@/components/Navbar";
-import { EnvelopeIcon, LockClosedIcon, ShieldCheckIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, LockClosedIcon, ShieldCheckIcon, EyeIcon, EyeSlashIcon, PencilIcon } from "@heroicons/react/24/outline";
 
 export default function Login() {
     const router = useRouter();
@@ -103,6 +103,21 @@ export default function Login() {
 
                         {requiresVerification ? (
                             <form onSubmit={handleVerify} className="space-y-6">
+                                <div className="flex items-center justify-center mb-4 bg-gray-50 rounded-md py-2 px-4 border border-chBorder">
+                                    <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                                    <span className="text-chTextPrimary text-sm font-medium truncate flex-1">
+                                        {verificationEmail}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRequiresVerification(false)}
+                                        className="ml-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none"
+                                        title="Edit email"
+                                    >
+                                        <PencilIcon className="h-4 w-4 text-gray-500" />
+                                    </button>
+                                </div>
+
                                 <div className="space-y-2">
                                     <label htmlFor="verification-code" className="block text-sm font-medium text-chTextPrimary">
                                         Verification Code
