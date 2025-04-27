@@ -16,6 +16,7 @@ import {
 import SearchBar from "@/components/SearchBar";
 import { getStorageItems } from "@/services/storageItem";
 import PhotoCard from "./storage/components/PhotoCard";
+import { StorageItemTypes } from "@/services/choices";
 
 export default function StoragePage() {
     const [items, setItems] = useState([]);
@@ -48,7 +49,7 @@ export default function StoragePage() {
     // Render different card types based on item type
     const renderCard = (item) => {
         switch (item.type) {
-            case "note":
+            case StorageItemTypes.NOTE:
                 return (
                     <div
                         key={item.id}
@@ -83,7 +84,7 @@ export default function StoragePage() {
                     </div>
                 );
 
-            case "task":
+            case StorageItemTypes.TASK:
                 return (
                     <div
                         key={item.id}
@@ -129,7 +130,7 @@ export default function StoragePage() {
                     </div>
                 );
 
-            case "link":
+            case StorageItemTypes.LINK:
                 return (
                     <div
                         key={item.id}
@@ -173,7 +174,7 @@ export default function StoragePage() {
                     </div>
                 );
 
-            case "file":
+            case StorageItemTypes.DOCUMENT:
                 return (
                     <div
                         key={item.id}
@@ -211,7 +212,7 @@ export default function StoragePage() {
                     </div>
                 );
 
-            case "event":
+            case StorageItemTypes.EVENT:
                 return (
                     <div
                         key={item.id}
@@ -256,7 +257,7 @@ export default function StoragePage() {
                     </div>
                 );
 
-            case "PHOTO":
+            case StorageItemTypes.PHOTO:
                 return <PhotoCard key={item.id} item={item} />;
 
             default:
@@ -308,10 +309,11 @@ export default function StoragePage() {
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-chTextPrimary">Item Type</label>
                                 <select className="w-full rounded-md border border-chBorder bg-chBgPrimary px-3 py-2 text-chTextPrimary focus:outline-none focus:ring-1 focus:ring-ctaPrimary">
-                                    <option value="note">Note</option>
-                                    <option value="task">Task</option>
-                                    <option value="file">File</option>
-                                    <option value="link">Link</option>
+                                    {Object.values(StorageItemTypes).map((type) => (
+                                        <option key={`${type}-option`} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="space-y-2">
@@ -350,34 +352,16 @@ export default function StoragePage() {
                         }`}>
                         All Items
                     </button>
-                    <button
-                        onClick={() => setFilter("note")}
-                        className={`px-4 py-2 rounded-full text-sm ${
-                            filter === "note" ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
-                        }`}>
-                        Notes
-                    </button>
-                    <button
-                        onClick={() => setFilter("task")}
-                        className={`px-4 py-2 rounded-full text-sm ${
-                            filter === "task" ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
-                        }`}>
-                        Tasks
-                    </button>
-                    <button
-                        onClick={() => setFilter("link")}
-                        className={`px-4 py-2 rounded-full text-sm ${
-                            filter === "link" ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
-                        }`}>
-                        Links
-                    </button>
-                    <button
-                        onClick={() => setFilter("file")}
-                        className={`px-4 py-2 rounded-full text-sm ${
-                            filter === "file" ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
-                        }`}>
-                        Files
-                    </button>
+                    {Object.values(StorageItemTypes).map((type) => (
+                        <button
+                            key={`${type}-button`}
+                            onClick={() => setFilter(type)}
+                            className={`px-4 py-2 rounded-full text-sm lowercase first-letter:uppercase ${
+                                filter === type ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
+                            }`}>
+                            {type}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Pinterest-like Grid Layout */}
