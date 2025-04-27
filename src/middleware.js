@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 
 export function middleware(request) {
+  // Skip middleware for public files
+  if (request.nextUrl.pathname.startsWith('/images/')) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get('token')?.value;
   
   const authPaths = ['/login', '/register', '/verify'];
@@ -30,13 +35,6 @@ export function middleware(request) {
 // Define which paths this middleware should run on
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

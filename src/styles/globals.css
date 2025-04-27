@@ -1,27 +1,40 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+    :root {
+        --font-serif: var(--font-serif);
+        --font-accent: var(--font-accent);
+        --font-mono: var(--font-mono);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-serif: var(--font-serif);
-  --font-accent: var(--font-accent);
-  --font-mono: var(--font-mono);
-}
+        /* Light theme variables */
+        --color-chBgPrimary: rgb(251, 251, 251);
+        --color-chBgSecondary: rgb(255, 255, 255);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+        --color-chBorder: rgb(206, 207, 210);
+
+        --color-chTextPrimary: rgb(17 24 39);
+        --color-chTextSecondary: rgb(107 114 128);
+
+        --color-ctaPrimary: rgb(162 36 102);
+        --color-ctaSecondary: rgb(223, 90, 139);
+    }
+
+    .dark {
+        /* Dark theme variables */
+        --color-chBgPrimary: rgb(0, 0, 0);
+        --color-chBgSecondary: rgb(14, 14, 14);
+
+        --color-chBorder: rgb(34, 34, 34);
+
+        --color-chTextPrimary: rgb(255, 255, 255);
+        --color-chTextSecondary: rgb(209, 213, 219);
+    }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-mono);
+    background-color: var(--color-pageBg);
+    color: var(--color-pageFg);
+    font-family: var(--font-mono);
 }

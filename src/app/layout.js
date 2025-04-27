@@ -1,14 +1,15 @@
 import { Xanh_Mono, Doto, Space_Grotesk } from "next/font/google";
-import "@/styles/globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import '@/styles/globals.css';   
 
 const xanhMono = Xanh_Mono({
     variable: "--font-serif",
     weight: ["400"],
-
 });
 
 const doto = Doto({
     variable: "--font-accent",
+    subsets: ["latin"],
     weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
@@ -24,8 +25,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
-            <body className={`${xanhMono.variable} ${doto.variable} ${spaceGrotesk.variable} antialiased`}>{children}</body>
+        <html lang="en" data-theme="light">
+            <body className={`${xanhMono.variable} ${doto.variable} ${spaceGrotesk.variable} antialiased bg-chBgPrimary`}>
+                <ThemeProvider>{children}</ThemeProvider>
+            </body>
         </html>
     );
 }
