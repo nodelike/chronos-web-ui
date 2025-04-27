@@ -352,12 +352,12 @@ export default function StoragePage() {
                         }`}>
                         All Items
                     </button>
-                    {Object.values(StorageItemTypes).map((type) => (
+                    {Object.keys(StorageItemTypes).map((type) => (
                         <button
                             key={`${type}-button`}
-                            onClick={() => setFilter(type)}
+                            onClick={() => setFilter(StorageItemTypes[type])}
                             className={`px-4 py-2 rounded-full text-sm lowercase first-letter:uppercase ${
-                                filter === type ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
+                                filter === StorageItemTypes[type] ? "bg-ctaPrimary text-white" : "bg-chBgSecondary text-chTextPrimary border border-chBorder"
                             }`}>
                             {type}
                         </button>

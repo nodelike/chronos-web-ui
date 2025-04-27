@@ -7,6 +7,6 @@ export const StorageItemTypes = {
     NOTE: "NOTE",
     LOCATION: "LOCATION",
     LINK: "LINK",
-    SOCIAL_MEDIA: "SOCIAL_MEDIA",
+    SOCIAL: "SOCIAL_MEDIA",
     OTHER: "OTHER",
 };
