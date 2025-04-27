@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, ArrowDownTrayIcon, ShareIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { getStorageItemById } from "@/services/storageItem";
+import PeopleGrid from "../components/PeopleGrid";
 
 // Main image section component
 const ImageSection = ({ photoDetails, hoveredFace, setHoveredFace, isFullscreen }) => {
@@ -72,83 +73,6 @@ const FileInfoCard = ({ photoDetails }) => {
     );
 };
 
-// People grid component
-const PeopleGrid = ({ faces, hoveredFace, setHoveredFace }) => {
-    if (!faces || faces.length === 0) return null;
-
-    return (
-        <div className="bg-chBgPrimary/50 p-5 rounded-xl border border-chBorder shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-chTextPrimary">People Detected ({faces.length})</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto pr-2 scrollbar-thin">
-                {faces.map((face) => (
-                    <div
-                        key={face.id}
-                        className={`flex flex-col rounded-lg ${
-                            hoveredFace === face.id
-                                ? "bg-ctaPrimary/10 border-ctaPrimary ring-1 ring-ctaPrimary"
-                                : "bg-chBgPrimary border-chBorder hover:border-ctaPrimary/50"
-                        } border shadow-sm transition-all hover:shadow-md cursor-pointer overflow-hidden`}
-                        onMouseEnter={() => setHoveredFace(face.id)}
-                        onMouseLeave={() => setHoveredFace(null)}>
-                        {/* Profile picture - square aspect ratio */}
-                        <div className="aspect-square w-full bg-gray-100 overflow-hidden relative">
-                            {face.person?.profilePicture ? (
-                                <img
-                                    src={face.person.profilePicture.s3Url}
-                                    alt={face.person.name || "Person"}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="h-full w-full flex items-center justify-center bg-gray-200 text-gray-500">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth={1.5}
-                                        stroke="currentColor"
-                                        className="w-10 h-10">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                                        />
-                                    </svg>
-                                </div>
-                            )}
-
-                            {/* Badge for celebrity */}
-                            {face.person?.type === "CELEBRITY" && (
-                                <span className="absolute top-1 right-1 px-1.5 py-0.5 text-xs rounded-full bg-violet-500/80 text-white font-medium">
-                                    Celebrity
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Person info */}
-                        <div className="p-2.5 flex-grow flex flex-col justify-between">
-                            <p className="font-medium text-chTextPrimary text-sm line-clamp-1">{face.person?.name || "Unknown Person"}</p>
-                            <div className="text-xs text-chTextSecondary mt-1 flex flex-wrap gap-1 items-center">
-                                {face.gender && <span className="inline-block">{face.gender.charAt(0) + face.gender.slice(1).toLowerCase()}</span>}
-                                {face.age && (
-                                    <>
-                                        <span className="text-gray-400">•</span>
-                                        <span>Age: ~{face.age}</span>
-                                    </>
-                                )}
-                                {face.emotions && face.emotions.length > 0 && (
-                                    <span className="px-1.5 py-0.5 rounded-full bg-chBgSecondary text-[10px] ml-auto">
-                                        {face.emotions[0].toLowerCase()}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
 // Labels component
 const LabelsSection = ({ mediaMeta }) => {
     const labelMeta = mediaMeta?.find((meta) => meta.type === "LABEL");
@@ -177,8 +101,8 @@ const OcrSection = ({ mediaMeta }) => {
 
     return (
         <div className="bg-chBgPrimary/50 p-5 rounded-xl border border-chBorder shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-chTextPrimary">Text in Image</h3>
-            <p className="text-chTextPrimary bg-chBgPrimary p-3 rounded-md border border-chBorder">{ocrMeta.payload.text}</p>
+            <h3 className="text-lg font-semibold mb-2 text-chTextPrimary">Text found:</h3>
+            <p className="text-chTextPrimary">{ocrMeta.payload.text}</p>
         </div>
     );
 };
@@ -255,6 +179,40 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
     const [error, setError] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [hoveredFace, setHoveredFace] = useState(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+    // Add CSS animation for tooltip
+    useEffect(() => {
+        // Add animation keyframes for tooltip
+        const style = document.createElement("style");
+        style.innerHTML = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fadeIn {
+                animation: fadeIn 0.2s ease-out forwards;
+            }
+        `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
+
+    const handleMouseMove = (e) => {
+        setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    useEffect(() => {
+        // Add mouse move event listener
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchPhotoDetails = async () => {
@@ -347,7 +305,13 @@ const PhotoModal = ({ itemId, isOpen, onClose }) => {
                                 {/* Metadata Section */}
                                 <div className={`${isFullscreen ? "w-full max-w-5xl mx-auto" : "lg:w-2/5"}`}>
                                     <div className="space-y-6">
-                                        <PeopleGrid faces={photoDetails.face} hoveredFace={hoveredFace} setHoveredFace={setHoveredFace} />
+                                        <PeopleGrid
+                                            faces={photoDetails.face}
+                                            hoveredFace={hoveredFace}
+                                            setHoveredFace={setHoveredFace}
+                                            mousePosition={mousePosition}
+                                            isFullscreen={isFullscreen}
+                                        />
                                         <LabelsSection mediaMeta={photoDetails.mediaMeta} />
                                         <OcrSection mediaMeta={photoDetails.mediaMeta} />
                                     </div>
