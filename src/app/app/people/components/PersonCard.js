@@ -1,9 +1,11 @@
 import React from 'react';
 import { UserIcon } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/navigation';
 
 const PersonCard = ({ person, onEdit, onDelete }) => {
     const { id, name, type, gender, age, profilePicture } = person;
+    const router = useRouter();
     
     // Display name or a placeholder based on person type
     const displayName = name || (type === 'PERSON' ? `Unknown Person` : 'Unknown');
@@ -12,6 +14,12 @@ const PersonCard = ({ person, onEdit, onDelete }) => {
     const shortName = displayName.length > 12 
         ? displayName.substring(0, 11) + '...' 
         : displayName;
+        
+    // Navigate to person's storage
+    const handleViewStorage = (e) => {
+        e.stopPropagation(); // Prevent triggering the parent onClick (edit)
+        router.push(`/app/people/${id}/storage`);
+    };
 
     return (
         <div 
@@ -42,6 +50,14 @@ const PersonCard = ({ person, onEdit, onDelete }) => {
             
             {/* Name */}
             <span className="text-sm text-chTextPrimary text-center font-medium">{shortName}</span>
+            
+            {/* Storage button */}
+            <button
+                onClick={handleViewStorage}
+                className="text-xs text-ctaPrimary hover:underline"
+            >
+                View Storage
+            </button>
             
             {/* Delete button - only visible on hover */}
             <button 
