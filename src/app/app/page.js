@@ -3,13 +3,21 @@
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import StorageGrid from "@/components/StorageGrid";
+import AddItemModal from "@/app/app/storage/components/AddItemModal";
+import { StorageItemTypes } from "@/services/choices";
 
 export default function StoragePage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const openModal = (initialType) => {
+    const openModal = () => {
         setIsModalOpen(true);
     };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleItemAdded = () => {};
 
     return (
         <>
@@ -27,6 +35,9 @@ export default function StoragePage() {
                 {/* Storage Grid Component */}
                 <StorageGrid showFilters={true} enableDragDrop={true} />
             </div>
+
+            {/* Add Item Modal */}
+            <AddItemModal isOpen={isModalOpen} onClose={closeModal} onItemAdded={handleItemAdded} initialItemType={StorageItemTypes.NOTE} />
         </>
     );
 }

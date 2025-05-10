@@ -38,6 +38,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Deployment to Railway
+
+When deploying to Railway, it's critical to set the environment variables correctly:
+
+1. In your Railway project, set the following environment variables:
+   ```
+   NEXT_PUBLIC_API_URL=https://chronos-rest-staging.nodelike.com
+   ```
+
+2. Important: Make sure that the API URL does NOT contain any internal Railway URLs (like `railway.internal`) in the path. These should be separate domains/subdomains.
+
+3. If you're seeing 405 Method Not Allowed errors, check:
+   - The API URL is correctly set without any path issues
+   - The backend service is properly configured to accept POST requests
+   - There are no proxy or routing issues in your Railway setup
+
 ## Authentication Flow
 
 The application implements a complete authentication flow:
