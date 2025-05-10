@@ -1,17 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { UserIcon, EnvelopeIcon, KeyIcon, BellIcon, CogIcon } from "@heroicons/react/24/outline";
+import { UserIcon, EnvelopeIcon, KeyIcon, BellIcon, CogIcon, ArrowRightOnRectangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { logout } from "@/services/auth";
 
 export default function AccountPage() {
     const [activeTab, setActiveTab] = useState("profile");
-    
+    const [showSignOutModal, setShowSignOutModal] = useState(false);
+
     // Mock user data
     const user = {
         name: "John Doe",
         email: "john.doe@example.com",
         avatar: null,
-        joinDate: "May 2023"
+        joinDate: "May 2023",
+    };
+
+    const handleSignOut = () => {
+        setShowSignOutModal(true);
+    };
+
+    const confirmSignOut = () => {
+        logout();
+    };
+
+    const closeSignOutModal = () => {
+        setShowSignOutModal(false);
     };
 
     return (
@@ -20,7 +34,7 @@ export default function AccountPage() {
                 <h1 className="text-3xl font-bold text-chTextPrimary mb-2">Account Settings</h1>
                 <p className="text-chTextSecondary">Manage your personal information and preferences</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {/* Sidebar */}
                 <div className="md:col-span-1">
@@ -38,56 +52,52 @@ export default function AccountPage() {
                             <h2 className="text-lg font-semibold text-chTextPrimary">{user.name}</h2>
                             <p className="text-sm text-chTextSecondary">Member since {user.joinDate}</p>
                         </div>
-                        
+
                         <nav className="space-y-1">
                             <button
                                 onClick={() => setActiveTab("profile")}
                                 className={`w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                                    activeTab === "profile"
-                                        ? "bg-ctaPrimary text-white"
-                                        : "text-chTextPrimary hover:bg-chBgPrimary"
-                                }`}
-                            >
+                                    activeTab === "profile" ? "bg-ctaPrimary text-white" : "text-chTextPrimary hover:bg-chBgPrimary"
+                                }`}>
                                 <UserIcon className="h-5 w-5 mr-3" />
                                 Profile
                             </button>
                             <button
                                 onClick={() => setActiveTab("security")}
                                 className={`w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                                    activeTab === "security"
-                                        ? "bg-ctaPrimary text-white"
-                                        : "text-chTextPrimary hover:bg-chBgPrimary"
-                                }`}
-                            >
+                                    activeTab === "security" ? "bg-ctaPrimary text-white" : "text-chTextPrimary hover:bg-chBgPrimary"
+                                }`}>
                                 <KeyIcon className="h-5 w-5 mr-3" />
                                 Security
                             </button>
                             <button
                                 onClick={() => setActiveTab("notifications")}
                                 className={`w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                                    activeTab === "notifications"
-                                        ? "bg-ctaPrimary text-white"
-                                        : "text-chTextPrimary hover:bg-chBgPrimary"
-                                }`}
-                            >
+                                    activeTab === "notifications" ? "bg-ctaPrimary text-white" : "text-chTextPrimary hover:bg-chBgPrimary"
+                                }`}>
                                 <BellIcon className="h-5 w-5 mr-3" />
                                 Notifications
                             </button>
                             <button
                                 onClick={() => setActiveTab("preferences")}
                                 className={`w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg ${
-                                    activeTab === "preferences"
-                                        ? "bg-ctaPrimary text-white"
-                                        : "text-chTextPrimary hover:bg-chBgPrimary"
-                                }`}
-                            >
+                                    activeTab === "preferences" ? "bg-ctaPrimary text-white" : "text-chTextPrimary hover:bg-chBgPrimary"
+                                }`}>
                                 <CogIcon className="h-5 w-5 mr-3" />
                                 Preferences
+                            </button>
+
+                            {/* Sign Out Button */}
+                            <button
+                                onClick={handleSignOut}
+                                className="w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg text-red-500 hover:bg-red-50">
+                                <ArrowRightOnRectangleIcon className="h-5 w-5 mr-3" />
+                                Sign Out
                             </button>
                         </nav>
                     </div>
                 </div>
-                
+
                 {/* Main Content */}
                 <div className="md:col-span-3">
                     <div className="bg-chBgSecondary rounded-xl p-6 border border-chBorder shadow-sm">
@@ -111,7 +121,7 @@ export default function AccountPage() {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <label htmlFor="email" className="block text-sm font-medium text-chTextSecondary mb-1">
                                             Email Address
@@ -128,11 +138,9 @@ export default function AccountPage() {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <div>
-                                        <label className="block text-sm font-medium text-chTextSecondary mb-1">
-                                            Profile Picture
-                                        </label>
+                                        <label className="block text-sm font-medium text-chTextSecondary mb-1">Profile Picture</label>
                                         <div className="flex items-center mt-2">
                                             <div className="h-16 w-16 rounded-full bg-gray-300 overflow-hidden mr-4 border border-chBorder">
                                                 {user.avatar ? (
@@ -147,16 +155,12 @@ export default function AccountPage() {
                                                 <button className="bg-chBgPrimary border border-chBorder text-chTextPrimary px-3 py-1.5 rounded-md text-sm hover:bg-chBgPrimary/80">
                                                     Upload New Picture
                                                 </button>
-                                                {user.avatar && (
-                                                    <button className="ml-2 text-red-500 text-sm hover:text-red-600">
-                                                        Remove
-                                                    </button>
-                                                )}
+                                                {user.avatar && <button className="ml-2 text-red-500 text-sm hover:text-red-600">Remove</button>}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mt-6 pt-4 border-t border-chBorder flex justify-end">
                                     <button className="bg-ctaPrimary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors">
                                         Save Changes
@@ -164,7 +168,7 @@ export default function AccountPage() {
                                 </div>
                             </div>
                         )}
-                        
+
                         {activeTab === "security" && (
                             <div>
                                 <h2 className="text-xl font-semibold text-chTextPrimary mb-4">Security Settings</h2>
@@ -205,7 +209,7 @@ export default function AccountPage() {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mt-6 pt-4 border-t border-chBorder flex justify-end">
                                     <button className="bg-ctaPrimary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors">
                                         Update Password
@@ -213,12 +217,12 @@ export default function AccountPage() {
                                 </div>
                             </div>
                         )}
-                        
+
                         {activeTab === "notifications" && (
                             <div>
                                 <h2 className="text-xl font-semibold text-chTextPrimary mb-4">Notification Preferences</h2>
                                 <p className="text-chTextSecondary mb-6">Choose how you want to be notified about activities and updates</p>
-                                
+
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between py-2 border-b border-chBorder">
                                         <div>
@@ -230,7 +234,7 @@ export default function AccountPage() {
                                             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctaPrimary"></div>
                                         </label>
                                     </div>
-                                    
+
                                     <div className="flex items-center justify-between py-2 border-b border-chBorder">
                                         <div>
                                             <h3 className="text-chTextPrimary font-medium">Task Reminders</h3>
@@ -241,7 +245,7 @@ export default function AccountPage() {
                                             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ctaPrimary"></div>
                                         </label>
                                     </div>
-                                    
+
                                     <div className="flex items-center justify-between py-2 border-b border-chBorder">
                                         <div>
                                             <h3 className="text-chTextPrimary font-medium">New Features</h3>
@@ -253,7 +257,7 @@ export default function AccountPage() {
                                         </label>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mt-6 pt-4 border-t border-chBorder flex justify-end">
                                     <button className="bg-ctaPrimary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors">
                                         Save Preferences
@@ -261,7 +265,7 @@ export default function AccountPage() {
                                 </div>
                             </div>
                         )}
-                        
+
                         {activeTab === "preferences" && (
                             <div>
                                 <h2 className="text-xl font-semibold text-chTextPrimary mb-4">Account Preferences</h2>
@@ -278,7 +282,7 @@ export default function AccountPage() {
                                             <option value="de">Deutsch</option>
                                         </select>
                                     </div>
-                                    
+
                                     <div className="flex items-center justify-between py-2 border-b border-chBorder">
                                         <div>
                                             <h3 className="text-chTextPrimary font-medium">Default View</h3>
@@ -291,7 +295,7 @@ export default function AccountPage() {
                                         </select>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mt-10 pt-4 border-t border-chBorder">
                                     <h3 className="text-lg font-medium text-red-500 mb-2">Danger Zone</h3>
                                     <p className="text-sm text-chTextSecondary mb-4">
@@ -306,6 +310,31 @@ export default function AccountPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Sign Out Confirmation Modal */}
+            {showSignOutModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-chBgSecondary rounded-xl p-6 max-w-md w-full mx-4 shadow-xl border border-chBorder">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-semibold text-chTextPrimary">Sign Out</h3>
+                            <button onClick={closeSignOutModal} className="text-chTextSecondary hover:text-chTextPrimary">
+                                <XMarkIcon className="h-6 w-6" />
+                            </button>
+                        </div>
+                        <p className="text-chTextSecondary mb-6">Are you sure you want to sign out?</p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={closeSignOutModal}
+                                className="px-4 py-2 bg-chBgPrimary text-chTextPrimary border border-chBorder rounded-md hover:bg-chBgPrimary/80">
+                                Cancel
+                            </button>
+                            <button onClick={confirmSignOut} className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-} 
+}
