@@ -82,7 +82,7 @@ export default function PersonStoragePage() {
             />
           )}
           <div>
-            <h1 className="text-2xl font-semibold text-chTextPrimary">{displayName}'s Storage</h1>
+            <h1 className="text-2xl font-semibold text-chTextPrimary">{displayName}&apos;s Storage</h1>
             <p className="text-chTextSecondary mt-1">Manage and view digital content associated with this person</p>
           </div>
         </div>

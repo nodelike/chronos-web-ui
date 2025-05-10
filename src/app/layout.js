@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 const xanhMono = Xanh_Mono({
     variable: "--font-serif",
     weight: ["400"],
+    subsets: ["latin"],
 });
 
 const doto = Doto({
@@ -16,6 +17,7 @@ const doto = Doto({
 const spaceGrotesk = Space_Grotesk({
     variable: "--font-mono",
     weight: ["300", "400", "500", "600", "700"],
+    subsets: ["latin"],
 });
 
 export const metadata = {
