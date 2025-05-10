@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { getPersonById } from '@/services/person';
 import StorageGrid from '@/components/StorageGrid';
+import AddItemModal from '@/app/app/storage/components/AddItemModal';
+import { StorageItemTypes } from '@/services/choices';
 
 export default function PersonStoragePage() {
   const params = useParams();
@@ -12,6 +14,8 @@ export default function PersonStoragePage() {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
 
   useEffect(() => {
     const fetchPerson = async () => {
@@ -35,6 +39,19 @@ export default function PersonStoragePage() {
 
   const handleBack = () => {
     router.back();
+  };
+
+  const handleItemAdded = () => {
+    // Force StorageGrid to refresh by updating the key
+    setShouldRefresh(prev => !prev);
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   if (loading) {
@@ -81,15 +98,30 @@ export default function PersonStoragePage() {
               className="w-12 h-12 rounded-full object-cover mr-4"
             />
           )}
-          <div>
+          <div className="flex-grow">
             <h1 className="text-2xl font-semibold text-chTextPrimary">{displayName}&apos;s Storage</h1>
             <p className="text-chTextSecondary mt-1">Manage and view digital content associated with this person</p>
           </div>
+          <button
+            onClick={openModal}
+            className="px-4 py-2 bg-ctaPrimary text-white rounded-md hover:opacity-90 flex items-center"
+          >
+            <span>Add Item</span>
+          </button>
         </div>
       </div>
 
-      {/* Person Storage Items Grid */}
-      <StorageGrid personId={params.id} showFilters={true} enableDragDrop={true} />
+      {/* Person Storage Items Grid - Using key to force refresh */}
+      <StorageGrid key={shouldRefresh} personId={params.id} showFilters={true} enableDragDrop={true} />
+
+      {/* Add Item Modal */}
+      <AddItemModal 
+        isOpen={isModalOpen} 
+        onClose={closeModal} 
+        onItemAdded={handleItemAdded} 
+        initialItemType={StorageItemTypes.NOTE}
+        personId={params.id}
+      />
     </div>
   );
 } 

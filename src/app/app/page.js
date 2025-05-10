@@ -8,6 +8,7 @@ import { StorageItemTypes } from "@/services/choices";
 
 export default function StoragePage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [shouldRefresh, setShouldRefresh] = useState(false);
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -17,7 +18,10 @@ export default function StoragePage() {
         setIsModalOpen(false);
     };
 
-    const handleItemAdded = () => {};
+    const handleItemAdded = () => {
+        // Force StorageGrid to refresh by updating the key
+        setShouldRefresh((prev) => !prev);
+    };
 
     return (
         <>
@@ -32,8 +36,8 @@ export default function StoragePage() {
                     <p className="text-chTextSecondary">Organize and access your digital content</p>
                 </div>
 
-                {/* Storage Grid Component */}
-                <StorageGrid showFilters={true} enableDragDrop={true} />
+                {/* Storage Grid Component - Using key to force refresh */}
+                <StorageGrid key={shouldRefresh} showFilters={true} enableDragDrop={true} />
             </div>
 
             {/* Add Item Modal */}

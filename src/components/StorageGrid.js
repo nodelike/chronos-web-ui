@@ -34,7 +34,7 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
         try {
             setLoading(true);
             let response;
-            
+
             if (personId) {
                 // Fetch storage items for a specific person
                 response = await getPersonStorageItems(personId);
@@ -42,7 +42,7 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
                 // Fetch all storage items
                 response = await getStorageItems();
             }
-            
+
             setItems(response?.data?.items || []);
             setError(null);
         } catch (error) {
@@ -52,7 +52,7 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
             setLoading(false);
         }
     };
-    
+
     useEffect(() => {
         fetchItems();
     }, [personId]);
@@ -76,7 +76,7 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
         } else if (fileType === "document") {
             setModalItemType(StorageItemTypes.DOCUMENT);
         }
-        
+
         setDroppedFile(file);
         setIsModalOpen(true);
     };
@@ -326,7 +326,7 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
                 );
         }
     };
-    
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -334,31 +334,28 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
             </div>
         );
     }
-    
+
     if (error) {
         return (
             <div className="text-center py-10 text-ctaSecondary">
                 <p>{error}</p>
-                <button 
-                    onClick={fetchItems}
-                    className="mt-4 px-4 py-2 bg-ctaPrimary text-white rounded-md hover:opacity-90"
-                >
+                <button onClick={fetchItems} className="mt-4 px-4 py-2 bg-ctaPrimary text-white rounded-md hover:opacity-90">
                     Try Again
                 </button>
             </div>
         );
     }
-    
+
     return (
         <div>
             {/* Global file drag-and-drop handler - only if enabled */}
             {enableDragDrop && <FileDragDropHandler onFileDrop={handleGlobalFileDrop} />}
-            
+
             {/* Add Item Modal */}
-            <AddItemModal 
-                isOpen={isModalOpen} 
-                onClose={closeModal} 
-                onItemAdded={handleItemAdded} 
+            <AddItemModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onItemAdded={handleItemAdded}
                 initialItemType={modalItemType}
                 initialFile={droppedFile}
                 personId={personId}
@@ -402,4 +399,4 @@ const StorageGrid = ({ personId = null, showFilters = true, showSearch = false, 
     );
 };
 
-export default StorageGrid; 
+export default StorageGrid;
